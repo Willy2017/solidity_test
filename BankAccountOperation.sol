@@ -30,8 +30,7 @@ contract BankAccountOperation {
         owner=msg.sender;
     }
 
-    function withdraw(uint amount) payable external returns (bool){
-
+    function withdraw(uint amount) external returns (bool){
         if (addressPosList[msg.sender].state) {
             if (accountList[addressPosList[msg.sender].pos].balance < amount) {
                 return false;
@@ -40,6 +39,21 @@ contract BankAccountOperation {
             address payable Receiver = payable(msg.sender);
             accountList[addressPosList[msg.sender].pos].balance -= amount;
             Receiver.transfer(amount);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function withdrawAll() external returns (bool){
+        if (addressPosList[msg.sender].state) {
+            if (accountList[addressPosList[msg.sender].pos].balance == 0) {
+                return false;
+            }
+
+            address payable Receiver = payable(msg.sender);
+            Receiver.transfer(accountList[addressPosList[msg.sender].pos].balance);
+            accountList[addressPosList[msg.sender].pos].balance = 0;
             return true;
         } else {
             return false;
@@ -66,8 +80,10 @@ contract BankAccountOperation {
 
     function getBalance() external view {
         for(uint i=0;i<accountList.length;i++) {
-            console.log(accountList[i]._address);
-            console.log(accountList[i].balance);
+            if (0 < accountList[i].balance) {
+                console.log(accountList[i]._address);
+                console.log(accountList[i].balance);
+            }
         }
     }
 }
