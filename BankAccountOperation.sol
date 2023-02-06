@@ -40,7 +40,6 @@ contract BankAccountOperation {
             address payable Receiver = payable(msg.sender);
             accountList[addressPosList[msg.sender].pos].balance -= amount;
             Receiver.transfer(amount);
-            console.log(address(this).balance);
             return true;
         } else {
             return false;
@@ -58,11 +57,6 @@ contract BankAccountOperation {
             addressPosList[msg.sender].pos = accountList.length - 1;
             addressPosList[msg.sender].state = true;
         }
-        console.log(address(this).balance);
-    }
-
-    function getBalance() external view {
-        console.log(address(this).balance);
     }
 
     function destroySmartContract() public {
@@ -70,7 +64,7 @@ contract BankAccountOperation {
         selfdestruct(payable(owner));
     }
 
-    function printAll() public view {
+    function getBalance() external view {
         for(uint i=0;i<accountList.length;i++) {
             console.log(accountList[i]._address);
             console.log(accountList[i].balance);
