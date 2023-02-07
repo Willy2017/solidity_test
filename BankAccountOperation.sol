@@ -6,38 +6,38 @@ import "hardhat/console.sol";
 contract BankAccountOperation {
     address private owner;
 
-    struct addressInfo {
+    struct addressPos {
         bool state;
         uint pos;
     }
 
-    mapping(address=> addressInfo) private addressPosList;
+    mapping(address=> addressPos) private addressPosList;
 
-    struct accountInfo {
+    struct addressBalance {
         address _address;
         uint balance;
     }
 
-    accountInfo[] private accountList;
+    addressBalance[] private balanceList;
 
     constructor() payable {
-        accountInfo memory a;
+        addressBalance memory a;
         a._address = msg.sender;
-        a.balance += msg.value;
-        accountList.push(a);
-        addressPosList[msg.sender].pos = accountList.length - 1;
+        a.balance = msg.value;
+        balanceList.push(a);
+        addressPosList[msg.sender].pos = balanceList.length - 1;
         addressPosList[msg.sender].state = true;
         owner=msg.sender;
     }
 
     function withdraw(uint amount) external returns (bool){
         if (addressPosList[msg.sender].state) {
-            if (accountList[addressPosList[msg.sender].pos].balance < amount) {
+            if (balanceList[addressPosList[msg.sender].pos].balance < amount) {
                 return false;
             }
 
             address payable Receiver = payable(msg.sender);
-            accountList[addressPosList[msg.sender].pos].balance -= amount;
+            balanceList[addressPosList[msg.sender].pos].balance -= amount;
             Receiver.transfer(amount);
             return true;
         } else {
@@ -47,13 +47,13 @@ contract BankAccountOperation {
 
     function withdrawAll() external returns (bool){
         if (addressPosList[msg.sender].state) {
-            if (accountList[addressPosList[msg.sender].pos].balance == 0) {
+            if (balanceList[addressPosList[msg.sender].pos].balance == 0) {
                 return false;
             }
 
             address payable Receiver = payable(msg.sender);
-            Receiver.transfer(accountList[addressPosList[msg.sender].pos].balance);
-            accountList[addressPosList[msg.sender].pos].balance = 0;
+            Receiver.transfer(balanceList[addressPosList[msg.sender].pos].balance);
+            balanceList[addressPosList[msg.sender].pos].balance = 0;
             return true;
         } else {
             return false;
@@ -62,13 +62,13 @@ contract BankAccountOperation {
 
     function deposit() payable external {
         if (addressPosList[msg.sender].state) {
-            accountList[addressPosList[msg.sender].pos].balance += msg.value;
+            balanceList[addressPosList[msg.sender].pos].balance += msg.value;
         } else {
-            accountInfo memory a;
+            addressBalance memory a;
             a._address = msg.sender;
             a.balance += msg.value;
-            accountList.push(a);
-            addressPosList[msg.sender].pos = accountList.length - 1;
+            balanceList.push(a);
+            addressPosList[msg.sender].pos = balanceList.length - 1;
             addressPosList[msg.sender].state = true;
         }
     }
@@ -78,12 +78,23 @@ contract BankAccountOperation {
         selfdestruct(payable(owner));
     }
 
-    function getBalance() external view {
-        for(uint i=0;i<accountList.length;i++) {
-            if (0 < accountList[i].balance) {
-                console.log(accountList[i]._address);
-                console.log(accountList[i].balance);
+    function getAllBalance() external view {
+        require(msg.sender == owner, "You are not the owner!");
+ 
+        for(uint i=0; i < balanceList.length;i++) {
+            if (0 < balanceList[i].balance) {
+                console.log(balanceList[i]._address);
+                console.log(balanceList[i].balance);
             }
         }
+    }
+
+    function getBalance() external view returns (uint){
+        if (addressPosList[msg.sender].state) {
+            console.log(balanceList[addressPosList[msg.sender].pos].balance);
+            return balanceList[addressPosList[msg.sender].pos].balance;
+        }
+
+        return 0;
     }
 }
