@@ -73,11 +73,6 @@ contract BankAccountOperation {
         }
     }
 
-    function destroySmartContract() public {
-        require(msg.sender == owner, "You are not the owner!");
-        selfdestruct(payable(owner));
-    }
-
     function getAllBalance() external view {
         require(msg.sender == owner, "You are not the owner!");
  
